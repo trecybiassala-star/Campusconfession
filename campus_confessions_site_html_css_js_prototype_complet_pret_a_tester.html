@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CampusConfessions · Dis-le sans pression</title>
+  <meta name="description" content="Confessions anonymes étudiantes – Raconte une anecdote, like, commente. Simple, rapide, fun et 100% anonyme." />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E" />
+  <style>
+    /* ===== CSS RESET (moderne et doux) ===== */
+    *,*::before,*::after{box-sizing:border-box}
+    *{margin:0}
+    html:focus-within{scroll-behavior:smooth}
+    body{min-height:100vh;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    img,svg,video,canvas,audio,iframe,embed,object{display:block;max-width:100%}
+    input,button,textarea,select{font:inherit;color:inherit}
+    a{text-decoration:none;color:inherit}
+
+    /* ===== Thème & variables ===== */
+    :root{
+      --bg: #0b0f1a;
+      --card: rgba(255,255,255,0.12);
+      --muted: rgba(255,255,255,0.7);
+      --text: #ffffff;
+      --brand: #6ae3ff;
+      --brand-2: #a78bfa; /* violet doux */
+      --success: #34d399;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 10px;
+      --glass: saturate(120%) blur(10px);
+      --maxw: 1100px;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg: #f7f8fb; 
+        --card: rgba(255,255,255,0.8);
+        --text: #0d1220;
+        --muted: #495064;
+        --shadow: 0 12px 28px rgba(10,22,60,0.08);
+      }
+    }
+
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.55;
+    }
+
+    /* ===== Background décoratif (images + dégradé) ===== */
+    .site-bg{
+      position: fixed; inset: 0; z-index: -2; pointer-events: none;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(167,139,250,.35), transparent 60%),
+        radial-gradient(1000px 500px at 110% 10%, rgba(106,227,255,.35), transparent 55%),
+        linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.55)),
+        url('https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=1920&auto=format&fit=crop'); /* étudiants bibliothèque */
+      background-size: cover;
+      background-position: center;
+      filter: contrast(105%) brightness(0.9);
+    }
+    .site-bg-2{
+      position: fixed; inset: 0; z-index: -3; pointer-events: none;
+      background:
+        url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1920&auto=format&fit=crop'); /* carnet + stylo */
+      background-size: cover; background-position: center; opacity:.25; filter: blur(6px);
+    }
+
+    /* ===== Layout ===== */
+    .wrap{max-width: var(--maxw); margin-inline:auto; padding: 24px;}
+    header.nav{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; padding: 16px 22px; margin-top: 8px; border-radius: var(--radius-xl);
+      background: var(--card); backdrop-filter: var(--glass); box-shadow: var(--shadow);
+    }
+    .brand{display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.2px}
+    .brand .logo{width:38px; height:38px; display:grid; place-items:center; border-radius:12px; background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: 0 6px 18px rgba(99,102,241,.35)}
+    .brand small{color:var(--muted); font-weight:600}
+
+    .nav-actions{display:flex; gap:10px; align-items:center}
+    .btn{display:inline-flex; align-items:center; gap:8px; border:0; padding:10px 14px; border-radius:12px; cursor:pointer; background:rgba(255,255,255,.08); color:var(--text); box-shadow:var(--shadow)}
+    .btn:hover{background:rgba(255,255,255,.14)}
+    .btn.primary{background: linear-gradient(135deg, var(--brand), var(--brand-2)); color:black; font-weight:700}
+    .btn.primary:hover{filter:brightness(1.02)}
+
+    /* ===== Hero ===== */
+    .hero{margin-top:26px; display:grid; gap:18px; grid-template-columns: 1.1fr .9fr; align-items:stretch}
+    @media (max-width: 880px){.hero{grid-template-columns:1fr}}
+    .card{background: var(--card); backdrop-filter: var(--glass); border-radius: var(--radius-xl); box-shadow: var(--shadow)}
+    .hero .intro{padding: 28px}
+    .kicker{display:inline-flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.12em}
+    h1.title{font-size: clamp(26px, 3.8vw, 42px); line-height:1.1; margin-top:6px; font-weight:900}
+    .subtitle{margin-top:10px; color:var(--muted)}
+    .badges{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+    .pill{padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.08); font-size:12px}
+
+    .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px}
+    .stat{padding:14px; border-radius:14px; background: rgba(255,255,255,.06); text-align:center}
+    .stat b{font-size:18px}
+
+    .hero .art{position:relative; overflow:hidden}
+    .hero .art::before{content:""; position:absolute; inset:0; background:url('https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat; opacity:.7; filter: grayscale(.1) contrast(1.05)}
+    .hero .art .overlay{position:absolute; inset:auto 18px 18px 18px; background:rgba(0,0,0,.45); border-radius:16px; padding:16px; display:flex; gap:10px; flex-wrap:wrap}
+    .chip{display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.12); padding:6px 10px; border-radius:999px; font-size:12px}
+
+    /* ===== Grille principale ===== */
+    .grid{display:grid; grid-template-columns: 1.1fr .9fr; gap:18px; margin-top:20px}
+    @media (max-width: 1020px){.grid{grid-template-columns:1fr}}
+
+    /* ===== Formulaire de confession ===== */
+    .form{padding:22px}
+    .form h2{font-size:22px; margin-bottom:10px}
+    .row{display:grid; gap:12px; grid-template-columns: 1fr 1fr}
+    @media (max-width: 720px){.row{grid-template-columns:1fr}}
+    .control{display:flex; flex-direction:column; gap:8px}
+    .control label{font-size:13px; color:var(--muted)}
+    .input, textarea{background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); padding:12px 14px; border-radius:12px; color:var(--text)}
+    textarea{min-height:120px; resize:vertical}
+    .muted{color:var(--muted); font-size:12px}
+    .flex{display:flex; align-items:center; gap:10px}
+
+    .counter{margin-left:auto; font-size:12px; color:var(--muted)}
+    .actions{display:flex; gap:10px; justify-content:flex-end; margin-top:10px}
+    .hint{font-size:12px; color:var(--muted)}
+
+    /* ===== Barre outils (recherche / tri) ===== */
+    .toolbar{padding:14px 18px; display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+    .search{flex:1; min-width:220px; display:flex; gap:10px}
+    .search input{flex:1}
+    .select{appearance:none; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); padding:12px 14px; border-radius:12px; color:var(--text)}
+
+    /* ===== Liste des confessions ===== */
+    .feed{display:grid; gap:12px; padding: 18px}
+    .conf{background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:16px; display:grid; grid-template-columns: auto 1fr; gap:12px}
+    .avatar{width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background: linear-gradient(135deg, var(--brand), var(--brand-2)); color:#000; font-weight:800}
+    .conf header{display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px}
+    .conf p{font-size:15px; white-space:pre-wrap}
+    .tags{display:flex; gap:8px; flex-wrap:wrap}
+    .tag{font-size:11px; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.12)}
+
+    .conf .actions{justify-content:flex-start}
+    .btn.icon{padding:8px 10px}
+
+    /* ===== Modale commentaires ===== */
+    dialog.modal{border:0; border-radius:18px; background:var(--card); color:var(--text); width:min(680px, 92vw); box-shadow: var(--shadow); padding:0}
+    .modal header{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid rgba(255,255,255,.12)}
+    .modal .content{padding:16px; display:grid; gap:10px}
+    .comment{background: rgba(255,255,255,.06); padding:12px; border-radius:12px}
+
+    /* ===== Toasts ===== */
+    .toast{position: fixed; right: 20px; bottom: 20px; background: #111827; color:#fff; padding:12px 14px; border-radius:12px; box-shadow: var(--shadow); opacity:0; transform: translateY(8px); transition: .35s ease}
+    .toast.show{opacity:1; transform: translateY(0)}
+
+    /* ===== Footer ===== */
+    footer{margin:24px 0; color:var(--muted); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap}
+
+    /* ===== Accessibilité & préférences ===== */
+    @media (prefers-reduced-motion: reduce){
+      *{animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important}
+    }
+  </style>
+</head>
+<body>
+  <div class="site-bg"></div>
+  <div class="site-bg-2"></div>
+
+  <div class="wrap">
+    <!-- ===== NAV ===== -->
+    <header class="nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">💬</div>
+        <div>
+          <div>CampusConfessions</div>
+          <small>Dis-le sans pression</small>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <button class="btn" id="btnExport" title="Exporter les données (JSON)">⬇️ Export</button>
+        <button class="btn primary" id="btnNew">+ Nouvelle confession</button>
+      </div>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div class="card intro">
+        <span class="kicker">Anonyme • Léger • Fun</span>
+        <h1 class="title">Raconte ton anecdote, libère-toi, et fais rire (ou réfléchir) le campus.</h1>
+        <p class="subtitle">Une plateforme simple pour partager des moments vrais de la vie étudiante. Écris, publie, like, commente – sans pression.</p>
+        <div class="badges">
+          <div class="pill">100% Anonyme</div>
+          <div class="pill">Modération légère</div>
+          <div class="pill">Rapide & gratuit</div>
+        </div>
+        <div class="stats">
+          <div class="stat"><b id="statTotal">0</b><div class="muted">Confessions</div></div>
+          <div class="stat"><b id="statLikes">0</b><div class="muted">Likes</div></div>
+          <div class="stat"><b id="statToday">0</b><div class="muted">Aujourd'hui</div></div>
+        </div>
+      </div>
+      <div class="card art" aria-hidden="true">
+        <div class="overlay">
+          <span class="chip">😅 Drôle</span>
+          <span class="chip">📚 Études</span>
+          <span class="chip">💔 Love</span>
+          <span class="chip">🤯 OMG</span>
+          <span class="chip">😌 Feel good</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== GRID MAIN ===== -->
+    <section class="grid">
+      <!-- ==== COL: Form ==== -->
+      <article class="card form" id="formCard" aria-labelledby="formTitle">
+        <h2 id="formTitle">✍️ Publier une confession</h2>
+        <p class="hint">Reste respectueux·se. Pas d'insultes, harcèlement, données personnelles ou propos dangereux.</p>
+
+        <div class="control" style="margin-top:12px">
+          <label for="content">Ton texte (100 à 300 caractères)</label>
+          <textarea id="content" maxlength="300" minlength="20" placeholder="Ex: J’ai appelé mon prof 'maman' devant tout l’amphi…"></textarea>
+          <div class="flex">
+            <div class="muted">Conseil : raconte un moment précis, c’est plus impactant.</div>
+            <div class="counter" id="counter">0/300</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div class="control">
+            <label for="category">Catégorie</label>
+            <select id="category" class="select" aria-label="Catégorie">
+              <option>😅 Drôle</option>
+              <option>📚 Études</option>
+              <option>💔 Love</option>
+              <option>🤯 OMG</option>
+              <option>😌 Feel good</option>
+            </select>
+          </div>
+          <div class="control">
+            <label for="mood">Humeur (facultatif)</label>
+            <input id="mood" class="input" type="text" placeholder="ex: gêné·e, fier·e, fatigué·e…" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="btnClear">Réinitialiser</button>
+          <button class="btn primary" id="btnPost">Publier anonymement</button>
+        </div>
+      </article>
+
+      <!-- ==== COL: Feed ==== -->
+      <aside class="card">
+        <div class="toolbar">
+          <div class="search">
+            <input class="input" id="q" placeholder="Rechercher une confession…" />
+            <select id="sort" class="select" aria-label="Trier par">
+              <option value="latest">📅 Récent</option>
+              <option value="top">❤️ Top</option>
+              <option value="random">🎲 Aléatoire</option>
+            </select>
+          </div>
+          <select id="filter" class="select" aria-label="Filtrer par catégorie">
+            <option value="all">Toutes</option>
+            <option value="😅 Drôle">😅 Drôle</option>
+            <option value="📚 Études">📚 Études</option>
+            <option value="💔 Love">💔 Love</option>
+            <option value="🤯 OMG">🤯 OMG</option>
+            <option value="😌 Feel good">😌 Feel good</option>
+          </select>
+        </div>
+        <div class="feed" id="feed" aria-live="polite"></div>
+      </aside>
+    </section>
+
+    <footer>
+      <div>© <span id="year"></span> CampusConfessions — Fait avec ❤️ par des étudiant·e·s.</div>
+      <div class="muted">Images de fond suggérées :
+        <span class="tag">Bibliothèque (Unsplash)</span>
+        <span class="tag">Carnet (Unsplash)</span>
+        <span class="tag">Amphi (Unsplash)</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ===== MODAL: Commentaires ===== -->
+  <dialog class="modal" id="modalComments" aria-labelledby="modalTitle">
+    <header>
+      <h3 id="modalTitle">Commentaires</h3>
+      <button class="btn icon" id="btnCloseModal" aria-label="Fermer">✖️</button>
+    </header>
+    <div class="content">
+      <div id="commentsList" class="feed" style="padding:0"></div>
+      <div class="row">
+        <input class="input" id="commentInput" placeholder="Écrire un commentaire anonyme…" />
+        <button class="btn primary" id="btnAddComment">Envoyer</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ===== Toast ===== -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    /* ====================
+       JS – logique front simple (localStorage)
+       ==================== */
+    const $ = (s, root=document) => root.querySelector(s);
+    const $$ = (s, root=document) => Array.from(root.querySelectorAll(s));
+
+    const state = {
+      confessions: [],
+      filter: 'all',
+      sort: 'latest',
+      search: '',
+      currentConfId: null,
+    };
+
+    const STORAGE_KEY = 'cc_confessions_v1';
+    const LIKE_KEY = 'cc_likes_v1';
+
+    function uid(){ return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+    function nowISO(){ return new Date().toISOString(); }
+
+    function load(){
+      try{ state.confessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || seed(); }
+      catch{ state.confessions = seed(); }
+      render();
+    }
+
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.confessions)); }
+
+    function seed(){
+      const demo = [
+        {id:uid(), cat:'😅 Drôle', mood:'gêné·e', text:"J’ai appelé mon prof 'maman' devant tout l’amphi.", ts: nowISO(), likes: 8, comments: []},
+        {id:uid(), cat:'📚 Études', mood:'fatigué·e', text:"Mon PC a fait une mise à jour de 2h la veille du TP de prog.", ts: nowISO(), likes: 15, comments: []},
+        {id:uid(), cat:'💔 Love', mood:'perdu·e', text:"Il/elle m’a ghost au milieu d’un devoir de groupe…", ts: nowISO(), likes: 5, comments: []},
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(demo));
+      return demo;
+    }
+
+    function toast(msg){
+      const t = $('#toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(()=> t.classList.remove('show'), 2400);
+    }
+
+    // === Form handling ===
+    const content = $('#content');
+    const counter = $('#counter');
+    content.addEventListener('input', ()=> { counter.textContent = content.value.length + '/300'; });
+
+    $('#btnClear').addEventListener('click', ()=>{ content.value=''; counter.textContent='0/300'; $('#mood').value=''; $('#category').selectedIndex=0; });
+
+    $('#btnPost').addEventListener('click', ()=>{
+      const text = content.value.trim();
+      if(text.length < 20 || text.length > 300){ return toast('Le texte doit faire entre 20 et 300 caractères.'); }
+      if(forbidden(text)){ return toast('Texte refusé: propos ou données sensibles détectées.'); }
+      const c = {
+        id: uid(),
+        cat: $('#category').value,
+        mood: ($('#mood').value || '').trim(),
+        text,
+        ts: nowISO(),
+        likes: 0, comments: []
+      };
+      state.confessions.unshift(c);
+      save();
+      content.value=''; counter.textContent='0/300'; $('#mood').value='';
+      render();
+      toast('Confession publiée ✅');
+    });
+
+    // Légère modération (liste minimale — à adapter côté serveur en prod)
+    const FORBIDDEN = ['numéro', 'téléphone', 'adresse', 'facebook.com', 'instagram.com', 'whatsapp', 'me tue', 'suicide', 'haine'];
+    function forbidden(text){
+      const t = text.toLowerCase();
+      return FORBIDDEN.some(w => t.includes(w));
+    }
+
+    // === Toolbar ===
+    $('#q').addEventListener('input', (e)=>{ state.search = e.target.value.toLowerCase(); render(); });
+    $('#sort').addEventListener('change', (e)=>{ state.sort = e.target.value; render(); });
+    $('#filter').addEventListener('change', (e)=>{ state.filter = e.target.value; render(); });
+
+    $('#btnNew').addEventListener('click', ()=>{ document.getElementById('content').focus(); window.scrollTo({top: document.getElementById('formCard').offsetTop - 16, behavior:'smooth'}); });
+
+    // === Export ===
+    $('#btnExport').addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(state.confessions, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='campusconfessions-data.json'; a.click();
+      setTimeout(()=> URL.revokeObjectURL(url), 1000);
+    });
+
+    // === Render feed ===
+    function render(){
+      // Stats
+      $('#statTotal').textContent = state.confessions.length;
+      $('#statLikes').textContent = state.confessions.reduce((n,c)=>n+(c.likes||0),0);
+      const today = new Date().toDateString();
+      $('#statToday').textContent = state.confessions.filter(c => new Date(c.ts).toDateString()===today).length;
+
+      // Query
+      let list = [...state.confessions];
+      if(state.filter !== 'all') list = list.filter(c=> c.cat === state.filter);
+      if(state.search) list = list.filter(c=> c.text.toLowerCase().includes(state.search));
+      if(state.sort==='latest') list.sort((a,b)=> new Date(b.ts) - new Date(a.ts));
+      if(state.sort==='top') list.sort((a,b)=> (b.likes||0) - (a.likes||0));
+      if(state.sort==='random') list.sort(()=> Math.random() - .5);
+
+      const feed = $('#feed'); feed.innerHTML='';
+      if(!list.length){ feed.innerHTML = `<div class="muted">Aucune confession – sois la/le premier·ère à publier !</div>`; return; }
+
+      const liked = JSON.parse(localStorage.getItem(LIKE_KEY) || '{}');
+
+      for(const c of list){
+        const card = document.createElement('article');
+        card.className = 'conf';
+        card.innerHTML = `
+          <div class="avatar" aria-hidden="true">${c.cat.split(' ')[0]}</div>
+          <div>
+            <header>
+              <span class="tag">${c.cat}</span>
+              ${c.mood?`<span class="tag">Humeur: ${escapeHtml(c.mood)}</span>`:''}
+              <span class="muted" style="margin-left:auto">${timeAgo(c.ts)}</span>
+            </header>
+            <p>${linkify(escapeHtml(c.text))}</p>
+            <div class="actions" style="margin-top:8px">
+              <button class="btn icon" data-like="${c.id}">${liked[c.id]? '💖' : '🤍'} <span>${c.likes||0}</span></button>
+              <button class="btn icon" data-comment="${c.id}">💬 Commenter</button>
+              <button class="btn icon" data-share="${c.id}">🔗 Partager</button>
+            </div>
+          </div>`;
+        feed.appendChild(card);
+      }
+
+      // Wire buttons
+      $$('button[data-like]').forEach(btn=> btn.addEventListener('click', onLike));
+      $$('button[data-comment]').forEach(btn=> btn.addEventListener('click', openComments));
+      $$('button[data-share]').forEach(btn=> btn.addEventListener('click', onShare));
+
+      // Footer year
+      $('#year').textContent = new Date().getFullYear();
+    }
+
+    function onLike(e){
+      const id = e.currentTarget.getAttribute('data-like');
+      const liked = JSON.parse(localStorage.getItem(LIKE_KEY) || '{}');
+      const c = state.confessions.find(x=> x.id===id);
+      if(!c) return;
+      if(liked[id]){ c.likes = Math.max(0, (c.likes||0)-1); delete liked[id]; }
+      else { c.likes = (c.likes||0)+1; liked[id]=1; }
+      localStorage.setItem(LIKE_KEY, JSON.stringify(liked));
+      save(); render();
+    }
+
+    // === Comments modal ===
+    const modal = $('#modalComments');
+    $('#btnCloseModal').addEventListener('click', ()=> modal.close());
+    $('#btnAddComment').addEventListener('click', ()=>{
+      const id = state.currentConfId; if(!id) return;
+      const input = $('#commentInput'); const val = input.value.trim();
+      if(!val) return toast('Écris un commentaire.');
+      const conf = state.confessions.find(c=> c.id===id); if(!conf) return;
+      conf.comments.push({id:uid(), text: val.slice(0,200), ts: nowISO()});
+      input.value=''; save(); renderComments(conf); toast('Commentaire ajouté');
+    });
+
+    function openComments(e){
+      const id = e.currentTarget.getAttribute('data-comment');
+      state.currentConfId = id; const conf = state.confessions.find(c=> c.id===id);
+      renderComments(conf); modal.showModal();
+    }
+
+    function renderComments(conf){
+      $('#modalTitle').textContent = 'Commentaires';
+      const list = $('#commentsList'); list.innerHTML='';
+      if(!conf.comments.length){ list.innerHTML = '<div class="muted">Aucun commentaire (encore) 😶</div>'; }
+      for(const cm of conf.comments){
+        const el = document.createElement('div');
+        el.className='comment';
+        el.innerHTML = `<div class="muted" style="font-size:12px">${timeAgo(cm.ts)}</div><div>${linkify(escapeHtml(cm.text))}</div>`;
+        list.appendChild(el);
+      }
+    }
+
+    // === Share ===
+    async function onShare(e){
+      const id = e.currentTarget.getAttribute('data-share');
+      const url = location.origin + location.pathname + '#conf-' + id;
+      try{
+        await navigator.clipboard.writeText(url);
+        toast('Lien copié ✅');
+      }catch{
+        toast('Copie du lien impossible');
+      }
+    }
+
+    // === Utils ===
+    function timeAgo(iso){
+      const d = new Date(iso); const diff = (Date.now() - d.getTime())/1000;
+      if(diff < 60) return 'à l\'instant';
+      const m = Math.floor(diff/60); if(m<60) return `il y a ${m} min`;
+      const h = Math.floor(m/60); if(h<24) return `il y a ${h} h`;
+      const days = Math.floor(h/24); if(days<7) return `il y a ${days} j`;
+      return d.toLocaleDateString();
+    }
+
+    function escapeHtml(s){
+      return s.replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    }
+
+    function linkify(text){
+      const urlRE = /(https?:\/\/[^\s]+)/g;
+      return text.replace(urlRE, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
+
+    // Init
+    load();
+  </script>
+</body>
+</html>
