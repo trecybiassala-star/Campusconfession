@@ -1,0 +1,22 @@
+{
+  "name": "campusconfessions",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm --prefix frontend run dev -- --host 0.0.0.0\" \"npm --prefix backend run start:dev\"",
+    "frontend": "npm --prefix frontend run dev -- --host 0.0.0.0",
+    "backend": "npm --prefix backend run start:dev",
+    "install:all": "npm install --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.10.1",
+    "prisma": "^8.0.0-rc.33"
+  }
+}

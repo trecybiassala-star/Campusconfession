@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ConfessionCategory {
+  FUN
+  STUDY
+  LOVE
+  OMG
+  GOOD
+}
+
+enum ConfessionType {
+  NORMAL
+  ADVICE
+  POLL
+}
+
+enum ConfessionStatus {
+  PENDING
+  PUBLISHED
+  MASKED
+  DELETED
+}
+
+enum ReactionType {
+  HAHA
+  WOW
+  OUCH
+  UNDERSTAND
+  FIRE
+}
+
+enum ReportMotif {
+  HARASSMENT
+  PERSONAL_DATA
+  HATE
+  DANGER
+  SPAM
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWED
+  RESOLVED
+}
+
+enum ModeratorRole {
+  ADMIN
+  MODERATOR
+}
+
+enum ModerationAction {
+  APPROVE
+  HIDE
+  DELETE
+  BAN_DEVICE
+  WARN
+}
+
+model Campus {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  rules       String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  confessions    Confession[]
+  moderators     Moderator[]
+  forbiddenWords ForbiddenWord[]
+  challenges     Challenge[]
+
+  @@map("campuses")
+}
+
+model Confession {
+  id             String            @id @default(cuid())
+  campusId       String
+  campus         Campus            @relation(fields: [campusId], references: [id])
+  content        String
+  maskedContent  String?
+  category       ConfessionCategory
+  mood           String?
+  type           ConfessionType    @default(NORMAL)
+  status         ConfessionStatus  @default(PUBLISHED)
+  riskScore      Int               @default(0)
+  deletionCodeHash String?
+  deviceHash     String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  searchVector   String?
+
+  reactions     Reaction[]
+  comments      Comment[]
+  aliases       Alias[]
+  reports       Report[]
+  pollOptions   PollOption[]
+  pollVotes     PollVote[]
+  moderationLogs ModerationLog[]
+
+  @@index([campusId, status, createdAt])
+  @@index([deviceHash])
+  @@index([category, status])
+  @@index([searchVector])
+  @@map("confessions")
+}
+
+model Reaction {
+  id          String      @id @default(cuid())
+  confessionId String
+  confession  Confession  @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  deviceHash  String
+  type        ReactionType
+  createdAt   DateTime    @default(now())
+
+  @@unique([confessionId, deviceHash])
+  @@index([confessionId])
+  @@map("reactions")
+}
+
+model Comment {
+  id          String      @id @default(cuid())
+  confessionId String
+  confession  Confession  @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  parentId    String?
+  parent      Comment?    @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[]   @relation("CommentReplies")
+  content     String
+  alias       String?
+  deviceHash  String
+  status      String      @default("VISIBLE")
+  createdAt   DateTime    @default(now())
+
+  reports Report[]
+
+  @@index([confessionId, createdAt])
+  @@map("comments")
+}
+
+model Alias {
+  id          String     @id @default(cuid())
+  confessionId String
+  confession  Confession @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  deviceHash  String
+  alias       String
+  createdAt   DateTime   @default(now())
+
+  @@unique([confessionId, deviceHash])
+  @@map("aliases")
+}
+
+model PollOption {
+  id          String     @id @default(cuid())
+  confessionId String
+  confession  Confession @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  label       String
+  createdAt   DateTime   @default(now())
+
+  votes PollVote[]
+
+  @@map("poll_options")
+}
+
+model PollVote {
+  id          String      @id @default(cuid())
+  confessionId String
+  confession  Confession  @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  optionId    String
+  option      PollOption  @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  deviceHash  String
+  createdAt   DateTime    @default(now())
+
+  @@unique([confessionId, deviceHash])
+  @@map("poll_votes")
+}
+
+model Report {
+  id          String      @id @default(cuid())
+  targetType  String
+  targetId    String
+  confessionId String?
+  confession  Confession? @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  commentId   String?
+  comment     Comment?    @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  motif       ReportMotif
+  detail      String?
+  deviceHash  String
+  status      ReportStatus @default(OPEN)
+  createdAt   DateTime     @default(now())
+
+  @@index([status, createdAt])
+  @@map("reports")
+}
+
+model Challenge {
+  id          String   @id @default(cuid())
+  campusId    String
+  campus      Campus   @relation(fields: [campusId], references: [id])
+  title       String
+  description String?
+  startsAt    DateTime
+  endsAt      DateTime
+  createdAt   DateTime @default(now())
+
+  @@map("challenges")
+}
+
+model Moderator {
+  id           String        @id @default(cuid())
+  campusId     String?
+  campus       Campus?       @relation(fields: [campusId], references: [id])
+  email        String        @unique
+  passwordHash String
+  role         ModeratorRole @default(MODERATOR)
+  createdAt    DateTime      @default(now())
+
+  moderationLogs ModerationLog[]
+
+  @@map("moderators")
+}
+
+model ModerationLog {
+  id          String          @id @default(cuid())
+  moderatorId String?
+  moderator   Moderator?      @relation(fields: [moderatorId], references: [id], onDelete: SetNull)
+  confessionId String?
+  confession  Confession?     @relation(fields: [confessionId], references: [id], onDelete: SetNull)
+  action      ModerationAction
+  target      String
+  reason      String?
+  createdAt   DateTime        @default(now())
+
+  @@map("moderation_log")
+}
+
+model BannedDevice {
+  id          String   @id @default(cuid())
+  deviceHash  String   @unique
+  reason      String?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@map("banned_devices")
+}
+
+model ForbiddenWord {
+  id       String  @id @default(cuid())
+  campusId String?
+  campus   Campus? @relation(fields: [campusId], references: [id], onDelete: SetNull)
+  word     String
+  severity String  @default("medium")
+  createdAt DateTime @default(now())
+
+  @@unique([campusId, word])
+  @@map("forbidden_words")
+}
