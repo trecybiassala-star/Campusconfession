@@ -931,11 +931,27 @@
         return forbiddenWords.some((word) => lower.includes(word));
       }
 
+      function buildSafeUrl(rawUrl) {
+        const trimmed = String(rawUrl).trim().replace(/[.,;!?]+$/, '');
+        if (!trimmed) return null;
+
+        const prefixed = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+
+        try {
+          const url = new URL(prefixed);
+          if (!['http:', 'https:'].includes(url.protocol)) return null;
+          return url.toString();
+        } catch {
+          return null;
+        }
+      }
+
       function linkify(text) {
         const escaped = escapeHtml(text);
-        return escaped.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (match) => {
-          const url = /^https?:\/\//i.test(match) ? match : 'https://' + match;
-          return `<a href="${url}" target="_blank" rel="noopener noreferrer">${match}</a>`;
+        return escaped.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/gi, (match) => {
+          const safeUrl = buildSafeUrl(match);
+          if (!safeUrl) return match;
+          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${match}</a>`;
         });
       }
 
@@ -1105,11 +1121,38 @@
         showToast('Commentaire ajouté ✅');
       }
 
+      async function copyTextToClipboard(value) {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(value);
+          return true;
+        }
+
+        const helper = document.createElement('textarea');
+        helper.value = value;
+        helper.setAttribute('readonly', '');
+        helper.style.position = 'fixed';
+        helper.style.top = '-9999px';
+        helper.style.left = '-9999px';
+        document.body.appendChild(helper);
+        helper.select();
+
+        let copied = false;
+        try {
+          copied = document.execCommand('copy');
+        } catch {
+          copied = false;
+        } finally {
+          helper.remove();
+        }
+
+        return copied;
+      }
+
       async function sharePost(id) {
         const url = `${window.location.origin}${window.location.pathname}#conf-${id}`;
         try {
-          await navigator.clipboard.writeText(url);
-          showToast('Lien copié ✅');
+          const copied = await copyTextToClipboard(url);
+          showToast(copied ? 'Lien copié ✅' : 'Lien prêt à être copié');
         } catch {
           const fallback = window.prompt('Copie ce lien :', url);
           if (fallback !== null) {
